@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pinterest Style Photography</title>
+
+<style>
+:root{
+  --bg:#0b0b0f;
+  --text:#ffffff;
+  --card:#15151c;
+}
+.light{
+  --bg:#f4f4f4;
+  --text:#111;
+  --card:#ffffff;
+}
+
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  transition:.3s;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 20px;
+  background:var(--card);
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+/* Hamburger */
+.menu{
+  font-size:26px;
+  cursor:pointer;
+}
+
+/* Search */
+.search{
+  flex:1;
+  margin:0 20px;
+}
+.search input{
+  width:100%;
+  padding:10px 14px;
+  border-radius:30px;
+  border:none;
+  outline:none;
+}
+
+/* Toggle */
+.toggle{
+  cursor:pointer;
+  padding:8px 14px;
+  border-radius:20px;
+  background:#888;
+  color:#fff;
+  font-size:14px;
+}
+
+/* Sidebar */
+.sidebar{
+  position:fixed;
+  left:-260px;
+  top:0;
+  height:100%;
+  width:240px;
+  background:var(--card);
+  padding:20px;
+  transition:.3s;
+  z-index:100;
+}
+.sidebar.active{ left:0; }
+
+.sidebar h3{
+  margin-top:20px;
+}
+.sidebar p{
+  cursor:pointer;
+  opacity:.8;
+}
+.sidebar p:hover{ opacity:1; }
+
+/* Gallery masonry */
+.gallery{
+  column-count:4;
+  column-gap:14px;
+  padding:14px;
+}
+
+@media(max-width:1000px){.gallery{column-count:3}}
+@media(max-width:700px){.gallery{column-count:2}}
+@media(max-width:450px){.gallery{column-count:1}}
+
+.photo{
+  break-inside:avoid;
+  margin-bottom:14px;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+}
+.photo img{
+  width:100%;
+  display:block;
+  transition:.4s;
+}
+.photo:hover img{
+  transform:scale(1.06);
+  filter:brightness(.8);
+}
+
+/* Lightbox */
+.lightbox{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:200;
+}
+.lightbox img{
+  max-width:90%;
+  max-height:90%;
+}
+.lightbox.active{display:flex;}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <h2>Categories</h2>
+  <p onclick="filterCategory('all')">All</p>
+  <p onclick="filterCategory('nature')">Nature</p>
+  <p onclick="filterCategory('cars')">Cars</p>
+  <p onclick="filterCategory('people')">People</p>
+</div>
+
+<header>
+  <div class="menu" onclick="toggleMenu()">☰</div>
+  <div class="search">
+    <input type="text" id="search" placeholder="Search photos...">
+  </div>
+  <div class="toggle" onclick="toggleMode()">🌗 Mode</div>
+</header>
+
+<!-- Gallery -->
+<div class="gallery" id="gallery">
+
+  <!-- Each photo has a title + category -->
+  <div class="photo" data-title="forest river" data-cat="nature">
+    <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
+  </div>
+
+  <div class="photo" data-title="mountain lake" data-cat="nature">
+    <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
+  </div>
+
+  <div class="photo" data-title="sports car" data-cat="cars">
+    <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8">
+  </div>
+
+  <div class="photo" data-title="vintage car" data-cat="cars">
+    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70">
+  </div>
+
+  <div class="photo" data-title="portrait woman" data-cat="people">
+    <img src="https://images.unsplash.com/photo-1492724441997-5dc865305da7">
+  </div>
+
+  <div class="photo" data-title="smiling man" data-cat="people">
+    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e">
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <img src="" id="lightbox-img">
+</div>
+
+<script>
+// Toggle sidebar
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('active');
+}
+
+// Dark / Light mode
+function toggleMode(){
+  document.body.classList.toggle('light');
+}
+
+// Lightbox
+const photos=document.querySelectorAll('.photo img');
+const lightbox=document.getElementById('lightbox');
+const lightboxImg=document.getElementById('lightbox-img');
+
+photos.forEach(img=>{
+  img.addEventListener('click',()=>{
+    lightbox.classList.add('active');
+    lightboxImg.src=img.src;
+  });
+});
+lightbox.addEventListener('click',()=>{
+  lightbox.classList.remove('active');
+});
+
+// Search filter
+document.getElementById('search').addEventListener('input',e=>{
+  const val=e.target.value.toLowerCase();
+  document.querySelectorAll('.photo').forEach(p=>{
+    const title=p.dataset.title;
+    p.style.display= title.includes(val)?'block':'none';
+  });
+});
+
+// Category filter
+function filterCategory(cat){
+  document.querySelectorAll('.photo').forEach(p=>{
+    if(cat==='all'||p.dataset.cat===cat){
+      p.style.display='block';
+    }else{
+      p.style.display='none';
+    }
+  });
+}
+</script>
+
+</body>
+</html>
